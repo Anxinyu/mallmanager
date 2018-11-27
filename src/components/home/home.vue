@@ -1,5 +1,5 @@
 <template>
-  <el-container class="container">
+  <el-container class="container_home">
     <el-header class="header">
       <el-row>
         <el-col :span="4">
@@ -21,6 +21,7 @@
             <a
               href="#"
               class="logout"
+              @click.prevent="handleSignout()"
             >退出</a>
           </div>
         </el-col>
@@ -32,7 +33,7 @@
         class="aside"
       >
         <!-- 侧边栏导航 -->
-        <el-menu unique-opened="true">
+        <el-menu :unique-opened="true">
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-location"></i>
@@ -74,13 +75,13 @@
                 <span>商品列表</span>
               </el-menu-item>
             </el-menu-item-group>
-                        <el-menu-item-group>
+            <el-menu-item-group>
               <el-menu-item index="1-2">
                 <i class="el-icon-menu"></i>
                 <span>分类参数</span>
               </el-menu-item>
             </el-menu-item-group>
-                        <el-menu-item-group>
+            <el-menu-item-group>
               <el-menu-item index="1-3">
                 <i class="el-icon-menu"></i>
                 <span>商品分类</span>
@@ -101,7 +102,7 @@
             </el-menu-item-group>
           </el-submenu>
           <!-- 5 -->
-              <el-submenu index="5">
+          <el-submenu index="5">
             <template slot="title">
               <i class="el-icon-location"></i>
               <span>数据统计</span>
@@ -122,12 +123,25 @@
 
 <script>
 export default {
-
+    beforeCreate(){
+      // 获取token
+      const token =localStorage.getItem('token')
+      if(!token){
+        this.$router.push({name:'login'})
+      }
+    },
+    methods:{
+      handleSignout(){
+        localStorage.clear();
+        this.$message.success('退出成功');
+        this.$router.push({name:'login'})
+      }
+    }
 }
 </script>
 
 <style>
-    .container{
+    .container_home{
         height: 100%;
     }
     .header{

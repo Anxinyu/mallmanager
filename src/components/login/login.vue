@@ -43,7 +43,11 @@ export default {
             const {data,meta:{msg,status}}=res.data;
             // 登录成功,跳转home
             if(status===200){
+                // 保存token值
+                localStorage.setItem('token',data.token);
+                // 跳转home页面
                 this.$router.push({name:'home'});
+                // 提示登录成功
                 this.$message.success(msg);
             }else{
                 this.$message.error(msg);
