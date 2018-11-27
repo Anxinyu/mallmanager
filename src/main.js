@@ -5,7 +5,7 @@ import App from './App'
 import router from './router'
 import ElementUI from 'element-ui';
 import MyHttpServer from '@/plugins/http.js'
-import '@/node_modules/element-ui/lib/theme-chalk/index.css';
+import 'element-ui/lib/theme-chalk/index.css';
 import './assets/css/reset.css'
 Vue.use(ElementUI);
 Vue.use(MyHttpServer);

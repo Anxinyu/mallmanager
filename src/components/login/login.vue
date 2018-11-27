@@ -1,18 +1,25 @@
 <template>
   <div class=container>
     <el-form
-      :label-position="labelPosition"
+      label-position="top"
       label-width="80px"
       class="container_1"
     >
       <h2>用户登录</h2>
       <el-form-item label="用户名">
-        <el-input></el-input>
+        <el-input v-model="formdata.username"></el-input>
       </el-form-item>
-      <el-form-item label="密码" class="psw">
-        <el-input></el-input>
+      <el-form-item
+        label="密码"
+        class="psw"
+      >
+        <el-input v-model="formdata.password"></el-input>
       </el-form-item>
-      <el-button type="primary" class="login-btn">登录</el-button>
+      <el-button
+        @click.prevent="handleLogin()"
+        type="primary"
+        class="login-btn"
+      >登录</el-button>
     </el-form>
   </div>
 </template>
@@ -21,7 +28,27 @@
 export default {
     data(){
         return {
-                labelPosition: 'top',
+            formdata:{
+                username:'',
+                password:''
+            }
+        }
+    },
+    methods:{
+        // 登录请求
+        // ES7 async+await 希望让异步操作的代码,看起来像同步代码
+        async handleLogin(){
+           const res=await this.$http.post('login',this.formdata)
+                // console.log(res)
+            const {data,meta:{msg,status}}=res.data;
+            // 登录成功,跳转home
+            if(status===200){
+                this.$router.push({name:'home'});
+                this.$message.success(msg);
+            }else{
+                this.$message.error(msg);
+            }
+
         }
     }
 
