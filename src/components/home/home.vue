@@ -33,14 +33,17 @@
         class="aside"
       >
         <!-- 侧边栏导航 -->
-        <el-menu :unique-opened="true">
+        <el-menu
+          :unique-opened="true"
+          :router="true"
+        >
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-location"></i>
               <span>用户管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="1-1">
+              <el-menu-item index="user">
                 <i class="el-icon-menu"></i>
                 <span>用户列表</span>
               </el-menu-item>
@@ -116,49 +119,58 @@
           </el-submenu>
         </el-menu>
       </el-aside>
-      <el-main class="main">Main</el-main>
+      <el-main class="main">
+        <router-view class="main_container"></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script>
 export default {
-    beforeCreate(){
-      // 获取token
-      const token =localStorage.getItem('token')
-      if(!token){
-        this.$router.push({name:'login'})
-      }
-    },
-    methods:{
-      handleSignout(){
-        localStorage.clear();
-        this.$message.success('退出成功');
-        this.$router.push({name:'login'})
-      }
+  beforeCreate() {
+    // 获取token
+    const token = localStorage.getItem("token");
+    if (!token) {
+      this.$router.push({ name: "login" });
     }
-}
+  },
+  methods: {
+    // 退出功能
+    handleSignout() {
+      localStorage.clear();
+      this.$message.success("退出成功");
+      this.$router.push({ name: "login" });
+    },
+    showUserList() {
+      this.$router.push({ name: "user" });
+    }
+  }
+};
 </script>
 
 <style>
-    .container_home{
-        height: 100%;
-    }
-    .header{
-        background:  #b3c0d1;
-    }
-    .aside{
-        background: #d3dce6;
-    }
-    .main{
-        background: #e9eef3;
-    }
-    h3{
-        text-align: center;
-        line-height: 60px;
-        color: #fff;
-    }
-    .logout{
-        line-height: 60px;
-    }
+.container_home {
+  height: 100%;
+}
+.header {
+  background: #b3c0d1;
+}
+.aside {
+  background: #d3dce6;
+}
+.main {
+  background: #e9eef3;
+}
+h3 {
+  text-align: center;
+  line-height: 60px;
+  color: #fff;
+}
+.logout {
+  line-height: 60px;
+}
+.main_container{
+  height: 100%;
+}
 </style>
