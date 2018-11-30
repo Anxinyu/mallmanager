@@ -23,7 +23,7 @@
           ></el-button>
         </el-input>
         <el-button
-          @click.prevent="showAddUserVue()"
+          @click.prevent="showAddUserDia()"
           type="success"
           plain
         >添加用户</el-button>
@@ -32,7 +32,8 @@
     <!-- 表格 -->
     <el-table
       :data="userlist"
-      style="width: 100%">
+      style="width: 100%"
+    >
       <el-table-column
         type="index"
         label="#"
@@ -78,9 +79,10 @@
             type="primary"
             icon="el-icon-edit"
             circle
+            @click="showEditUserDia(scope.row)"
           ></el-button>
           <el-button
-          @click="deleteUser(scope.row.id)"
+            @click="deleteUser(scope.row.id)"
             size="mini"
             plain
             type="danger"
@@ -112,7 +114,8 @@
     <!-- 添加用户,默认隐藏,位置随意 -->
     <el-dialog
       title="添加用户"
-      :visible.sync="dialogFormVisible">
+      :visible.sync="dialogFormVisibleAdd"
+    >
       <el-form :model="form">
         <el-form-item
           label="用户名"
@@ -157,10 +160,57 @@
         slot="footer"
         class="dialog-footer"
       >
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="dialogFormVisibleDia = false">取 消</el-button>
         <el-button
           type="primary"
           @click="addUser()"
+        >确 定</el-button>
+      </div>
+    </el-dialog>
+    <!-- 编辑用户 -->
+    <el-dialog
+      title="编辑用户"
+      :visible.sync="dialogFormVisibleEdit"
+    >
+      <el-form :model="form">
+        <el-form-item
+          label="用户名"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="form.username"
+            autocomplete="off"
+            disabled
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="邮箱"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="form.email"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="电话"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="form.mobile"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogFormVisibleEdit = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="EditUser()"
         >确 定</el-button>
       </div>
     </el-dialog>
@@ -176,14 +226,16 @@ export default {
       total: -1,
       pagenum: 1,
       pagesize: 2,
-      dialogFormVisible: false,
+      dialogFormVisibleEdit: false,
+      dialogFormVisibleAdd: false,
       form: {
         username: "",
         password: "",
         email: "",
         mobile: ""
       },
-      formLabelWidth: "120px"
+      formLabelWidth: "120px",
+      // currUserId:-1 
     };
   },
   created() {
@@ -201,7 +253,7 @@ export default {
         }`
       );
 
-      // console.log(res);
+      console.log(res);
       const {
         data: { total, users },
         meta: { msg, status }
@@ -241,51 +293,71 @@ export default {
       this.getUserList();
     },
     // 添加用户
-    showAddUserVue() {
-      this.form={}
-      this.dialogFormVisible = true;
+    showAddUserDia() {
+      this.form = {};
+      this.dialogFormVisibleAdd = true;
     },
     addUser() {
       this.$http.post(`users`, this.form).then(res => {
-      //   // console.log(res);
+        //   // console.log(res);
         const {
           meta: { msg, status }
         } = res.data;
         if (status === 201) {
           this.getUserList();
           this.$message.success(msg);
-          this.dialogFormVisible = false;
+          this.dialogFormVisibleAdd = false;
         }
       });
     },
     // 删除用户
-    deleteUser(userId){
-       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
+    deleteUser(userId) {
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
           //发送删除请求:id
           // 1. data中找userId
           // 2. 把userId以参数形式传入
-         this.$http.delete(`users/${userId}`)
-         .then(res=>{
-           console.log(res)
-          if(res.data.meta.status===200){
-             this.$message({
-            type: 'success',
-            message: '删除成功!'
+          this.$http.delete(`users/${userId}`).then(res => {
+            console.log(res);
+            if (res.data.meta.status === 200) {
+              this.$message({
+                type: "success",
+                message: "删除成功!"
+              });
+              this.getUserList();
+            }
           });
-          this.getUserList();
-          }
-         })
-         
-        }).catch(() => {
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });          
+            type: "info",
+            message: "已取消删除"
+          });
         });
+    },
+    // 编辑用户
+    showEditUserDia(users) {
+      // 获取数据
+      this.form=users;
+      this.dialogFormVisibleEdit = true;
+    },
+    EditUser() {
+      this.$http.put(`users/${this.form.id}`, this.form).then(res => {
+        console.log(res);
+        const {
+          data: { users },
+          meta:{msg,status}
+        } = res.data;
+        if(status===200){
+          // this.getUserList();
+          this.dialogFormVisibleEdit=false;
+          this.$message.success(msg)
+        }
+      });
     }
   }
 };
