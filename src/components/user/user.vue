@@ -63,6 +63,7 @@
       <el-table-column label="用户状态">
         <template slot-scope="scope">
           <el-switch
+          @change="changeUserStatue(scope.row)"
             v-model="scope.row.mg_state"
             active-color="#13ce66"
             inactive-color="#ff4949"
@@ -358,6 +359,11 @@ export default {
           this.$message.success(msg)
         }
       });
+    },
+    // 修改用户状态
+    changeUserStatue(user){
+      console.log(user)
+      this.$http.put(`users/${user.id}/state/${user.mg_state}`)
     }
   }
 };
