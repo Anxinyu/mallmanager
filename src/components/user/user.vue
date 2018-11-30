@@ -23,6 +23,7 @@
           ></el-button>
         </el-input>
         <el-button
+          @click.prevent="showAddUserVue()"
           type="success"
           plain
         >添加用户</el-button>
@@ -101,13 +102,69 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagenum"
       :page-sizes="[2, 4, 6, 8]"
       :page-size="pagesize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
     >
     </el-pagination>
+    <!-- 添加用户,默认隐藏,位置随意 -->
+    <el-dialog
+      title="添加用户"
+      :visible.sync="dialogFormVisible"
+    >
+      <el-form :model="form">
+        <el-form-item
+          label="用户名"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="form.username"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          label="密码"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="form.password"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="邮箱"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="form.email"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="电话"
+          :label-width="formLabelWidth"
+        >
+          <el-input
+            v-model="form.mobile"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="addUser()"
+        >确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -119,48 +176,55 @@ export default {
       userlist: [],
       total: -1,
       pagenum: 1,
-      pagesize: 2
+      pagesize: 2,
+      dialogFormVisible: false,
+      form: {
+        username: "",
+        password: "",
+        email: "",
+        mobile: ""
+      },
+      formLabelWidth: "120px"
     };
   },
   created() {
     this.getUserList();
   },
   methods: {
-    getUserList() {
+    async getUserList() {
       // 设置默认的token
       const AUTH_TOKEN = localStorage.getItem("token");
       this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
       //   发送请求
-      this.$http
-        .get(
-          `users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${
-            this.pagesize
-          }`
-        )
-        .then(res => {
-          console.log(res);
-          const {
-            data: { total, pagenum, users },
-            meta: { msg, status }
-          } = res.data;
-          if (status === 200) {
-            //   1.给表格数据赋值
-            this.userlist = users;
-            // 2.给total赋值
-            this.total = total;
-            // 3.提示
-            this.$message.success(msg);
-          } else {
-            this.$message.warning(msg);
-          }
-        });
+      const res = await this.$http.get(
+        `users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${
+          this.pagesize
+        }`
+      );
+
+      // console.log(res);
+      const {
+        data: { total, users },
+        meta: { msg, status }
+      } = res.data;
+      if (status === 200) {
+        //   1.给表格数据赋值
+        this.userlist = users;
+        // 2.给total赋值
+        this.total = total;
+        // 3.提示
+        this.$message.success(msg);
+      } else {
+        this.$message.warning(msg);
+      }
     },
+
     // 管理每页显示多少条
     handleSizeChange(val) {
       //   设置每页的条数
       this.pagesize = val;
       //  返回第一页
-      //   this.pagenum = 1;
+      this.pagenum = 1;
       this.getUserList();
     },
     // 控制当前页,点击数字切换数据
@@ -168,6 +232,7 @@ export default {
       this.pagenum = val;
       this.getUserList();
     },
+
     // 搜索框
     searchUser() {
       this.getUserList();
@@ -175,6 +240,24 @@ export default {
     // 清空搜素框
     loadUserList() {
       this.getUserList();
+    },
+    // 添加用户
+    showAddUserVue() {
+      this.dialogFormVisible = true;
+    },
+    addUser() {
+      this.$http.post("users", this.form).then(res => {
+        // console.log(res);
+        const {
+          data: {},
+          meta: { msg, status }
+        } = res.data;
+        if (status === 201) {
+          this.getUserList();
+          this.$message.success(msg);
+          this.dialogFormVisible = false;
+        }
+      });
     }
   }
 };
