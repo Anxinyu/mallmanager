@@ -63,7 +63,7 @@
       <el-table-column label="用户状态">
         <template slot-scope="scope">
           <el-switch
-          @change="changeUserStatue(scope.row)"
+            @change="changeUserStatue(scope.row)"
             v-model="scope.row.mg_state"
             active-color="#13ce66"
             inactive-color="#ff4949"
@@ -91,6 +91,7 @@
             circle
           ></el-button>
           <el-button
+            @click="showUserRoleDia(scope.row)"
             size="mini"
             plain
             type="success"
@@ -215,6 +216,48 @@
         >确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 分配角色 -->
+    <el-dialog
+      title="分配用户"
+      :visible.sync="dialogFormVisibleRole"
+    >
+      <el-form :model="form">
+        <el-form-item
+          label="用户名"
+          :label-width="formLabelWidth"
+        >
+          {{currUsername}}
+        </el-form-item>
+        <el-form-item
+          label="角色"
+          :label-width="formLabelWidth"
+        >
+          <el-select v-model="currRoleId">
+            <el-option
+              label="请选择"
+              :value="-1"
+              disabled
+            ></el-option>
+            <el-option
+              :label="item"
+              :value="i"
+              v-for="(item,i) in 5"
+              :key="i"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="EditUserRole()"
+        >确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -229,6 +272,7 @@ export default {
       pagesize: 2,
       dialogFormVisibleEdit: false,
       dialogFormVisibleAdd: false,
+      dialogFormVisibleRole: false,
       form: {
         username: "",
         password: "",
@@ -236,7 +280,8 @@ export default {
         mobile: ""
       },
       formLabelWidth: "120px",
-      // currUserId:-1 
+      currRoleId: -1,
+      currUsername: ""
     };
   },
   created() {
@@ -343,7 +388,7 @@ export default {
     // 编辑用户
     showEditUserDia(users) {
       // 获取数据
-      this.form=users;
+      this.form = users;
       this.dialogFormVisibleEdit = true;
     },
     EditUser() {
@@ -351,20 +396,26 @@ export default {
         console.log(res);
         const {
           data: { users },
-          meta:{msg,status}
+          meta: { msg, status }
         } = res.data;
-        if(status===200){
+        if (status === 200) {
           // this.getUserList();
-          this.dialogFormVisibleEdit=false;
-          this.$message.success(msg)
+          this.dialogFormVisibleEdit = false;
+          this.$message.success(msg);
         }
       });
     },
     // 修改用户状态
-    changeUserStatue(user){
-      console.log(user)
-      this.$http.put(`users/${user.id}/state/${user.mg_state}`)
-    }
+    changeUserStatue(user) {
+      console.log(user);
+      this.$http.put(`users/${user.id}/state/${user.mg_state}`);
+    },
+    // 分配角色
+    showUserRoleDia(user) {
+      this.currUsername = user.username;
+      this.dialogFormVisibleRole = true;
+    },
+    EditUserRole() {}
   }
 };
 </script>
