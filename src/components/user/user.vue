@@ -239,9 +239,9 @@
               disabled
             ></el-option>
             <el-option
-              :label="item"
-              :value="i"
-              v-for="(item,i) in 5"
+              :label="item.roleName"
+              :value="item.id"
+              v-for="(item,i) in roleList"
               :key="i"
             ></el-option>
           </el-select>
@@ -254,7 +254,7 @@
         <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
         <el-button
           type="primary"
-          @click="EditUserRole()"
+          @click="SetUserRole()"
         >确 定</el-button>
       </div>
     </el-dialog>
@@ -281,7 +281,9 @@ export default {
       },
       formLabelWidth: "120px",
       currRoleId: -1,
-      currUsername: ""
+      currUsername: "",
+      roleList: [],
+      currUserId: -1
     };
   },
   created() {
@@ -299,7 +301,8 @@ export default {
         }`
       );
 
-      console.log(res);
+      // console.log(res);
+
       const {
         data: { total, users },
         meta: { msg, status }
@@ -358,7 +361,7 @@ export default {
     },
     // 删除用户
     deleteUser(userId) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("确定要删除该用户吗?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -368,7 +371,7 @@ export default {
           // 1. data中找userId
           // 2. 把userId以参数形式传入
           this.$http.delete(`users/${userId}`).then(res => {
-            console.log(res);
+            // console.log(res);
             if (res.data.meta.status === 200) {
               this.$message({
                 type: "success",
@@ -393,7 +396,7 @@ export default {
     },
     EditUser() {
       this.$http.put(`users/${this.form.id}`, this.form).then(res => {
-        console.log(res);
+        // console.log(res);
         const {
           data: { users },
           meta: { msg, status }
@@ -410,12 +413,42 @@ export default {
       console.log(user);
       this.$http.put(`users/${user.id}/state/${user.mg_state}`);
     },
-    // 分配角色
+    // 用户角色
     showUserRoleDia(user) {
+      // 当前用户信息---user
+      console.log(user);
+      this.currUserId = user.id;
+      // 获取rid---显示已有角色
+      this.$http.get(`users/${user.id}`).then(res => {
+        // console.log(res);
+        const { data } = res.data;
+        this.currRoleId = data.rid;
+      });
+      // 获取角色列表---显示可选角色
+      this.$http.get(`roles`).then(res => {
+        // console.log(res);
+        const {
+          data,
+          meta: { msg, status }
+        } = res.data;
+        if (status === 200) {
+          this.roleList = data;
+          console.log(this.roleList);
+        }
+      });
       this.currUsername = user.username;
       this.dialogFormVisibleRole = true;
     },
-    EditUserRole() {}
+    // 分配角色---修改角色
+    SetUserRole() {
+      // users/:id/role---要修改的用户id
+      this.$http
+        .put(`users/${this.currUserId}/role`, { rid: this.currRoleId })
+        .then(res => {
+          // console.log(res)
+        });
+      this.dialogFormVisibleRole = false;
+    }
   }
 };
 </script>
