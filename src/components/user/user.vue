@@ -32,8 +32,7 @@
     <!-- 表格 -->
     <el-table
       :data="userlist"
-      style="width: 100%"
-    >
+      style="width: 100%">
       <el-table-column
         type="index"
         label="#"
@@ -81,6 +80,7 @@
             circle
           ></el-button>
           <el-button
+          @click="deleteUser(scope.row.id)"
             size="mini"
             plain
             type="danger"
@@ -112,8 +112,7 @@
     <!-- 添加用户,默认隐藏,位置随意 -->
     <el-dialog
       title="添加用户"
-      :visible.sync="dialogFormVisible"
-    >
+      :visible.sync="dialogFormVisible">
       <el-form :model="form">
         <el-form-item
           label="用户名"
@@ -243,13 +242,13 @@ export default {
     },
     // 添加用户
     showAddUserVue() {
+      this.form={}
       this.dialogFormVisible = true;
     },
     addUser() {
-      this.$http.post("users", this.form).then(res => {
-        // console.log(res);
+      this.$http.post(`users`, this.form).then(res => {
+      //   // console.log(res);
         const {
-          data: {},
           meta: { msg, status }
         } = res.data;
         if (status === 201) {
@@ -258,6 +257,35 @@ export default {
           this.dialogFormVisible = false;
         }
       });
+    },
+    // 删除用户
+    deleteUser(userId){
+       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          //发送删除请求:id
+          // 1. data中找userId
+          // 2. 把userId以参数形式传入
+         this.$http.delete(`users/${userId}`)
+         .then(res=>{
+           console.log(res)
+          if(res.data.meta.status===200){
+             this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+          this.getUserList();
+          }
+         })
+         
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
     }
   }
 };
