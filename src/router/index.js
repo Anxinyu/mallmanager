@@ -8,7 +8,7 @@ import Roles from '@/components/rights/roles.vue'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/login',
@@ -24,7 +24,7 @@ export default new Router({
         name: 'users',
         component: Users
       },
-       {
+      {
         path: 'rights',
         name: 'rights',
         component: Rights
@@ -38,4 +38,18 @@ export default new Router({
     },
 
   ]
-})
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') {
+    next()
+  } else {
+    const token = localStorage.getItem("token")
+    if (!token) {
+     router.push({ name: "login" });
+      this.$message.warning('回到登录')
+      return
+    }
+  }
+});
+export default router

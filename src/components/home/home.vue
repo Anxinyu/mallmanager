@@ -70,13 +70,7 @@ export default {
       menus: []
     };
   },
-  beforeCreate() {
-    // 获取token
-    const token = localStorage.getItem("token");
-    if (!token) {
-      this.$router.push({ name: "login" });
-    }
-  },
+
   created() {
     // 获取导航数据
     this.getMenus();
